@@ -29,7 +29,6 @@
         <property name="basename" value="i18n"/>
     </bean>
 
-    <!-- 处理静态资源，tomcat/conf/web.xml 中配置了一个org.apache.catalina.servlets.DefaultServlet -->
     <!--
         SpringMVC 处理静态资源
         1. 为什么会有这样的问题
@@ -39,8 +38,32 @@
             所有找不到对应处理器报404
         2. 解决
             在 SpringMVC 的配置文件中配置 <mvc:default-servlet-handler/>
+
+        default-servlet-handler 将在 SpringMVC 上下文中定义一个 DefaultServletHttpRequestHandler
+        它会对进入 DispatcherServlet 的请求进行筛查，如果发现是没有经过映射的请求，就将该请求交由 WEB 应用服务器默认的
+        Servlet 处理，tomcat/conf/web.xml 中配置了一个servlet
+        <servlet>
+            <servlet-name>default</servlet-name>
+            <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
+            <init-param>
+                <param-name>debug</param-name>
+                <param-value>0</param-value>
+            </init-param>
+            <init-param>
+                <param-name>listings</param-name>
+                <param-value>false</param-value>
+            </init-param>
+            <load-on-startup>1</load-on-startup>
+        </servlet>
+        <servlet-mapping>
+            <servlet-name>default</servlet-name>
+            <url-pattern>/</url-pattern>
+        </servlet-mapping>
+
+        一般 WEB 应用服务器默认的 Servlet 的名称都是 default
+        若所使用的 WEB 服务器的默认 Servlet 名称不是 default，则需要通过 default-servlet-name 属性显式指定
     -->
-    <mvc:default-servlet-handler/>
+    <mvc:default-servlet-handler default-servlet-name="default"/>
 
     <!-- 在实际开发中通常都需配置 -->
     <!--
@@ -66,6 +89,12 @@
         <property name="converters">
             <set>
                 <ref bean="personConverter"/>
+                <ref bean="myDateTimeConverter"/>
+            </set>
+        </property>
+        <property name="formatters">
+            <set>
+                <!--<ref bean="myDateTimeFormatter"/>-->
             </set>
         </property>
     </bean>
@@ -99,6 +128,7 @@
         <!-- 必须和 JSP 的 pageEncoding 属性一致，以便正确解析表单的内容 -->
         <property name="defaultEncoding" value="UTF-8"/>
         <property name="maxUploadSize" value="#{100 * 1024 * 1024}"/>
+        <property name="maxInMemorySize" value="#{1 * 1024 * 1024}"/>
     </bean>
 
     <!-- 异常映射 -->

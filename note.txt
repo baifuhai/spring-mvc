@@ -46,3 +46,12 @@ SpringMVC 对比 Struts2
 2. Spring MVC 稍微比 Struts2 快些，Spring MVC 是基于方法设计，而 Struts2 是基于类，每次发一次请求都会实例一个 Action
 3. Spring MVC 使用更加简洁，开发效率更高，支持 JSR303，处理 ajax 的请求更方便
 4. Struts2 的 OGNL 表达式使页面的开发效率相比 Spring MVC 更高些
+
+===================================================================================
+
+filter 和 servlet 的 init 方法
+
+容器初始化时，先初始化所有 filter 的 init 方法，再初始化所有 servlet 的 init 方法
+filter 的 init 方法执行顺序随机
+servlet 的 init 方法根据 load-on-startup 值决定执行顺序，值越小，越先执行
+如果 servlet 没有加 load-on-startup，则 init 方法在第一次被请求时执行

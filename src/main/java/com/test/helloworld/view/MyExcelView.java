@@ -1,8 +1,6 @@
 package com.test.helloworld.view;
 
 import com.test.helloworld.entity.Person;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -10,7 +8,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
-import org.springframework.web.servlet.view.document.AbstractExcelView;
 import org.springframework.web.servlet.view.document.AbstractXlsView;
 
 import javax.servlet.http.HttpServletRequest;

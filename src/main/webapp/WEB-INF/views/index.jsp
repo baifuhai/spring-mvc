@@ -72,12 +72,16 @@
     <a href="testExcelView2">testExcelView2</a><br/>
 
     <a href="testRedirect">testRedirect</a><br/>
+    <a href="testForward">testForward</a><br/>
 
     <a href="emp/emps">emps</a><br/>
 
     <a href="testConverter?person=1-a">testConverter</a><br/>
 
-    <a href="testFormatter?birth=2018-01-01&salary=1,234,567.8">testFormatter</a><br/>
+    <a href="testConverterAndFormatter?date=2018-01-01">testConverterAndFormatter</a><br/>
+    <a href="testConverterAndFormatter2?date=2018-01-01">testConverterAndFormatter2</a><br/>
+
+    <a href="testFormatAnnotation?birth=2018-01-01&salary=1,234,567.8">testFormatAnnotation</a><br/>
 
     <a href="testJSR303Page">testJSR303Page</a><br/>
 
@@ -91,6 +95,7 @@
     <a href="testResponseBodyByteArray">testResponseBodyByteArray</a><br/>
 
     <a href="testResponseEntity">testResponseEntity</a><br/>
+    <a href="testHttpEntity">testHttpEntity</a><br/>
 
     <a href="testI18n">testI18n</a><br/>
     <a href="testI18n?locale=zh_CN">testI18n zh_CN</a><br/>
@@ -116,6 +121,8 @@
     <a href="testResponseStatus?i=0">testResponseStatus</a><br/>
     <a href="testResponseStatus2?i=0">testResponseStatus2</a><br/>
     <a href="testResponseStatus2?i=1">testResponseStatus2-</a><br/>
+
+    <a href="testResponseSendError?i=0">testResponseSendError</a><br/>
 
     <a href="testDefaultHandlerExceptionResolver">testDefaultHandlerExceptionResolver</a><br/>
 

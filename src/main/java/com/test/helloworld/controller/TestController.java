@@ -2,12 +2,14 @@ package com.test.helloworld.controller;
 
 import com.test.helloworld.entity.Car;
 import com.test.helloworld.entity.Person;
+import com.test.helloworld.entity.User;
 import com.test.helloworld.exception.MyException;
 import com.test.helloworld.view.HelloView;
 import com.test.helloworld.view.MyExcelView;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,6 +45,7 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -397,6 +400,26 @@ public class TestController {
     }
 
     /**
+     * testForward
+     *
+     * 可以 forward 到 jsp 或其他的 controller
+     * 不能写 success 转到 /WEB-INF/views/success.jsp
+     */
+    @RequestMapping("testForward")
+    public String testForward(){
+        System.out.println("testForward");
+        return "forward:/testForward2";
+        //return "forward:/abc.jsp";
+        //return "forward:success";
+    }
+
+    @RequestMapping("testForward2")
+    public String testForward2(){
+        System.out.println("testForward2");
+        return "success";
+    }
+
+    /**
      * 由 @InitBinder 标识的方法，可以对 WebDataBinder 对象进行初始化
      * WebDataBinder 是 DataBinder 的子类
      * 用于完成由表单字段到 JavaBean 属性的绑定
@@ -435,11 +458,31 @@ public class TestController {
     }
 
     /**
-     * 格式化器
+     * Date 在 Controller 方法的参数或参数的属性
+     * 用 Converter 或 Formatter 都可以实现 String 到 Date 的转换
+     * 两者都配，Formatter 生效
+     * 如果 User 里的 date 有 @DateTimeFormat注解，Converter 或 Formatter 生效
      */
-    @RequestMapping("testFormatter")
-    public String testFormatter(Person person, BindingResult bindingResult) {
-        System.out.println("testFormatter, person: " + person);
+    @RequestMapping("testConverterAndFormatter")
+    public String testConverterAndFormatter(Date date) {
+        System.out.println("testConverterAndFormatter, date: " + date);
+        return "success";
+    }
+
+    @RequestMapping("testConverterAndFormatter2")
+    public String testConverterAndFormatter2(User user) {
+        System.out.println("testConverterAndFormatter2, user: " + user);
+        return "success";
+    }
+
+    /**
+     * 格式化注解
+     * @DateTimeFormat
+     * @NumberFormat
+     */
+    @RequestMapping("testFormatAnnotation")
+    public String testFormatAnnotation(Person person, BindingResult bindingResult) {
+        System.out.println("testFormatAnnotation, person: " + person);
         if (bindingResult.hasErrors()) {
             System.out.println("bindingResult error");
             for (FieldError fieldError : bindingResult.getFieldErrors()) {
@@ -574,6 +617,20 @@ public class TestController {
         return responseEntity;
     }
 
+    @RequestMapping("testHttpEntity")
+    public HttpEntity<byte[]> testHttpEntity(HttpServletRequest request) throws IOException {
+        InputStream in = request.getServletContext().getResourceAsStream("/file/abc.txt");
+        byte[] body = new byte[in.available()];
+        in.read(body);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=abc.txt");
+
+        HttpEntity<byte[]> httpEntity = new HttpEntity<>(body, headers);
+
+        return httpEntity;
+    }
+
     @Autowired
     ResourceBundleMessageSource messageSource;
 
@@ -704,6 +761,17 @@ public class TestController {
     public String testResponseStatus2(int i) {
         if (i == 0) {
             throw new MyException();
+        }
+        return "success";
+    }
+
+    @RequestMapping("testResponseSendError")
+    public String testResponseSendError(int i, HttpServletResponse response) throws IOException {
+        try {
+            System.out.println(1 / i);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendError(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST.getReasonPhrase() + " [" + e.getMessage() + "]");
         }
         return "success";
     }
