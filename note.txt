@@ -1,0 +1,48 @@
+运行流程
+
+url 匹配 DispatcherServlet 的 url-pattern
+如果不存在映射，则检查是否配置 <mvc:default-servlet-handler/>
+  如果没有配置，则404页面，控制台输出 No mapping found for HTTP request with URI [/xx/xx] in DispatcherServlet
+  如果配置了，则查找目标资源，如果没找到也报404
+如果存在映射
+  获取 HandlerAdapter 对象
+  执行拦截器的 preHandle 方法
+  执行 HandlerAdapter 的 handle 方法，返回 ModelAndView 对象
+  执行拦截器的 postHandle 方法
+  如果以上发生异常，则使用 HandlerExceptionResolver 处理异常，得到新的 ModelAndView 对象
+  由 ViewResolver 解析 ModelAndView 对象的逻辑视图名得到物理视图 View 对象
+  由 View 对象调用 render 方法渲染 ModelAndView 对象的 ModelMap 里的数据
+  执行拦截器的 afterCompletion 方法
+
+===================================================================================
+
+在 Spring 的环境下使用 SpringMVC
+
+需要进行 Spring 整合 SpringMVC 吗 ?
+是否需要再加入 Spring 的 IOC 容器 ?
+是否需要在 web.xml 文件中配置启动 Spring IOC 容器的 ContextLoaderListener ?
+
+1. 不需要: 都放在 SpringMVC 的配置文件中，也可以分多个配置文件，然后使用 import 标签导入其他的配置文件
+2. 需要: 通常情况下，Service，Dao，数据源，事务，整合其他框架都是放在 Spring 的配置文件中
+     Controller 放在 SpringMVC 的配置文件中
+
+使用 exclude-filter 和 include-filter 子节点来规定只能扫描的注解
+使 Spring 的 IOC 容器扫描的包和 SpringMVC 的 IOC 容器扫描的包没有重合的部分
+防止 Bean 被创建两次
+
+SpringMVC 的 IOC 容器是子容器
+Spring 的 IOC 容器是父容器
+
+SpringMVC 的 IOC 容器中的 Bean 可以访问 Spring 的 IOC 容器中 Bean，反之不行
+因为Spring 的 IOC 容器先创建，因为是Listener
+SpringMVC 的 IOC 容器后创建，因为是servlet
+视频里是说外部不能引用内部
+
+===================================================================================
+
+SpringMVC 对比 Struts2
+
+1. Spring MVC 的入口是 Servlet，而 Struts2 是 Filter
+2. Spring MVC 稍微比 Struts2 快些，Spring MVC 是基于方法设计，而 Struts2 是基于类，每次发一次请求都会实例一个 Action
+3. Spring MVC 使用更加简洁，开发效率更高，支持 JSR303，处理 ajax 的请求更方便
+4. Struts2 的 OGNL 表达式使页面的开发效率相比 Spring MVC 更高些

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!-- 配置扫描的包 -->
+    <context:component-scan base-package="com.test" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
+
+    <!-- 配置视图解析器，把 controller 方法返回值解析为实际的物理视图 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/views/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <!-- 配置视图 BeanNameViewResolver 解析器: 使用视图的名字来解析视图 -->
+    <!-- 通过 order 属性来定义视图解析器的优先级，order 值越小优先级越高 -->
+    <!-- InternalResourceViewResolver 的优先级最小，是 Integer.MAX_VALUE -->
+    <bean class="org.springframework.web.servlet.view.BeanNameViewResolver">
+        <property name="order" value="100"></property>
+    </bean>
+
+    <!-- 配置国际化资源文件，id 必须写 -->
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="i18n"/>
+    </bean>
+
+    <!-- 处理静态资源，tomcat/conf/web.xml 中配置了一个org.apache.catalina.servlets.DefaultServlet -->
+    <!--
+        SpringMVC 处理静态资源
+        1. 为什么会有这样的问题
+            优雅的 REST 风格的资源 URL 不希望带 .html 或 .do 等后缀
+            若将 DispatcherServlet 请求映射配置为 /
+            那么 Spring MVC 将捕获所有请求，包括静态资源，SpringMVC 会将他们当成一个普通请求处理
+            所有找不到对应处理器报404
+        2. 解决
+            在 SpringMVC 的配置文件中配置 <mvc:default-servlet-handler/>
+    -->
+    <mvc:default-servlet-handler/>
+
+    <!-- 在实际开发中通常都需配置 -->
+    <!--
+        会自动注册3个bean:
+          RequestMappingHandlerMapping
+          RequestMappingHandlerAdapter
+          ExceptionHandlerExceptionResolver
+        还将提供以下支持:
+          – 支持使用 ConversionService 实例对表单参数进行类型转换
+          – 支持使用 @DateTimeFormat @NumberFormat 完成数据的格式化
+          – 支持使用 @Valid 注解对 JavaBean 实例进行 JSR303 验证
+          – 支持使用 @RequestBody @ResponseBody
+    -->
+    <!-- 如果配置了mvc:default-servlet-handler 或 mvc:view-controller，则这个必须配，要不然RequestMapping不起作用 -->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!-- 配置直接转发的页面，无需经过 Controller 的方法 -->
+    <mvc:view-controller path="/" view-name="index"/>
+
+    <!-- 配置 Converter -->
+    <!--<bean id="conversionService2" class="org.springframework.context.support.ConversionServiceFactoryBean">-->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <ref bean="personConverter"/>
+            </set>
+        </property>
+    </bean>
+
+    <!-- 默认使用 AcceptHeaderLocaleResolver，根据 HTTP 请求头的 Accept-Language 参数确定本地化类型 -->
+    <!-- id 必须写 -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver"></bean>
+
+    <!-- 拦截器 -->
+    <mvc:interceptors>
+        <!-- 通过请求参数 locale=zh_CN/en_US 改变 Locale -->
+        <bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"></bean>
+
+        <!--<bean class="com.test.helloworld.interceptor.MyFirstInterceptor"/>-->
+
+        <mvc:interceptor>
+            <mvc:mapping path="/testInterceptor"/>
+            <bean class="com.test.helloworld.interceptor.MyFirstInterceptor"/>
+        </mvc:interceptor>
+
+        <mvc:interceptor>
+            <!--<mvc:mapping path="/**"/>-->
+            <!--<mvc:exclude-mapping path="/xxx"/>-->
+            <mvc:mapping path="/testInterceptor"/>
+            <bean class="com.test.helloworld.interceptor.MySecondInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!-- 文件上传，id 必须写 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!-- 必须和 JSP 的 pageEncoding 属性一致，以便正确解析表单的内容 -->
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="maxUploadSize" value="#{100 * 1024 * 1024}"/>
+    </bean>
+
+    <!-- 异常映射 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionAttribute" value="exception"/>
+        <property name="exceptionMappings">
+            <props>
+                <!-- error 是 viewName -->
+                <prop key="java.lang.ArrayIndexOutOfBoundsException">error</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>
